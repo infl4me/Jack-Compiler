@@ -1,3 +1,5 @@
+import { KEYWORDS, SYMBOLS, TOKEN_TYPES } from './constants';
+
 const SPACE_SYMBOL = ' ';
 const LINE_END_SYMBOL = '\n';
 const STRING_CONSTANT_TRIGGER = '"';
@@ -14,72 +16,17 @@ const STATES = {
   INSIDE_MULTI_COMMENT: 'INSIDE_MULTI_COMMENT',
 };
 
-const SYMBOLS = {
-  CURLY_LEFT: '{',
-  CURLY_RIGHT: '}',
-
-  ROUND_LEFT: '(',
-  ROUND_RIGHT: ')',
-
-  SQUARE_LEFT: '[',
-  SQUARE_RIGHT: ']',
-
-  DOT: '.',
-  COMMA: ',',
-  SEMI: ';',
-
-  PLUS: '+',
-  MINUS: '-',
-  ASTERISK: '*',
-  SLASH: '/',
-
-  AMPERSAND: '&',
-  VBAR: '|',
-  LESS_THAN: '<',
-  MORE_THAN: '>',
-  EQUAL: '=',
-};
 const symbols = Object.values(SYMBOLS);
 const isSymbolToken = (v) => symbols.includes(v);
 
 const isValidIdentifierCharacter = (v) => /\w/i.test(v);
 
-const TOKEN_TYPES = {
-  KEYWORD: 'KEYWORD',
-  SYMBOL: 'SYMBOL',
-  INT_CONST: 'INT_CONST',
-  STRING_CONST: 'STRING_CONST',
-  IDENTIFIER: 'IDENTIFIER',
-};
-
-const KEYWORDS = {
-  CLASS: 'class',
-  METHOD: 'method',
-  FUNCTION: 'function',
-  CONSTRUCTOR: 'constructor',
-  INT: 'int',
-  BOOLEAN: 'boolean',
-  CHAR: 'char',
-  VOID: 'void',
-  VAR: 'var',
-  STATIC: 'static',
-  FIELD: 'field',
-  LET: 'let',
-  DO: 'do',
-  IF: 'if',
-  ELSE: 'else',
-  WHILE: 'while',
-  RETURN: 'return',
-  TRUE: 'true',
-  FALSE: 'false',
-  NULL: 'null',
-  THIS: 'this',
-};
 const keywords = Object.values(KEYWORDS);
 const isKeyword = (v) => keywords.includes(v);
 
 function isNumeric(str) {
-  if (typeof str !== 'string') return false; // we only process strings!
+  if (typeof str !== 'string') return false;
+
   return (
     !Number.isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
     !Number.isNaN(parseFloat(str))

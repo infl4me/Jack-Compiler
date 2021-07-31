@@ -1,3 +1,4 @@
+import { parse } from './parse';
 import { tokenize } from './tokenize';
 
-export { tokenize };
+export { tokenize, parse };
