@@ -66,6 +66,8 @@ export const NODE_TYPES = {
   RETURN: 'RETURN',
   IF: 'if',
   WHILE: 'WHILE',
+  SUBROUTINE_CALL: 'SUBROUTINE_CALL',
+  ARRAY_ACCESS: 'ARRAY_ACCESS',
 };
 
 export const VAR_TYPES = {
@@ -82,3 +84,29 @@ export const RETURN_TYPES = {
   VOID: KEYWORDS.VOID,
 };
 export const returnTypes = Object.values(RETURN_TYPES);
+
+export const KEYWORD_CONSTANTS = {
+  THIS: KEYWORDS.THIS,
+  TRUE: KEYWORDS.TRUE,
+  FALSE: KEYWORDS.FALSE,
+  NULL: KEYWORDS.NULL,
+};
+export const keywordConstants = Object.values(KEYWORD_CONSTANTS);
+
+export const UNARY_OPERATORS = {
+  MINUS: SYMBOLS.MINUS,
+};
+export const unaryOperators = Object.values(UNARY_OPERATORS);
+
+export const BINARY_OPERATORS = {
+  MINUS: SYMBOLS.MINUS,
+  PLUS: SYMBOLS.PLUS,
+  MULTIPLY: SYMBOLS.ASTERISK,
+  DIVIDE: SYMBOLS.SLASH,
+  AND: SYMBOLS.AMPERSAND,
+  OR: SYMBOLS.VBAR,
+  LESS_THAN: SYMBOLS.LESS_THAN,
+  MORE_THAN: SYMBOLS.MORE_THAN,
+  EQUAL: SYMBOLS.EQUAL,
+};
+export const binaryOperators = Object.values(BINARY_OPERATORS);

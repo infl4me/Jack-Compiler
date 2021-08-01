@@ -45,15 +45,21 @@ test('tokenize expressionless', async () => {
               },
             },
             Object {
-              "classId": "game",
-              "expression": null,
-              "routineId": "run",
+              "subroutineCall": Object {
+                "arguments": Array [],
+                "classId": "game",
+                "subroutineId": "run",
+                "type": "SUBROUTINE_CALL",
+              },
               "type": "DO",
             },
             Object {
-              "classId": "game",
-              "expression": null,
-              "routineId": "dispose",
+              "subroutineCall": Object {
+                "arguments": Array [],
+                "classId": "game",
+                "subroutineId": "dispose",
+                "type": "SUBROUTINE_CALL",
+              },
               "type": "DO",
             },
             Object {
@@ -105,25 +111,46 @@ test('tokenize expressionless', async () => {
                       },
                     },
                     Object {
-                      "classId": "game",
-                      "expression": null,
-                      "routineId": "run",
+                      "subroutineCall": Object {
+                        "arguments": Array [],
+                        "classId": "game",
+                        "subroutineId": "run",
+                        "type": "SUBROUTINE_CALL",
+                      },
                       "type": "DO",
                     },
                     Object {
                       "body": Array [],
                       "elseBody": Array [],
-                      "testExpression": null,
+                      "test": Object {
+                        "term": Object {
+                          "id": "b",
+                          "type": "IDENTIFIER",
+                        },
+                        "type": "SINGLE_TERM",
+                      },
                       "type": "if",
                     },
                   ],
                   "elseBody": null,
-                  "testExpression": null,
+                  "test": Object {
+                    "term": Object {
+                      "id": "b",
+                      "type": "IDENTIFIER",
+                    },
+                    "type": "SINGLE_TERM",
+                  },
                   "type": "if",
                 },
               ],
               "elseBody": Array [],
-              "testExpression": null,
+              "test": Object {
+                "term": Object {
+                  "id": "b",
+                  "type": "IDENTIFIER",
+                },
+                "type": "SINGLE_TERM",
+              },
               "type": "if",
             },
             Object {

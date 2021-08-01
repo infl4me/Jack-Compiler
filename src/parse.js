@@ -1,4 +1,14 @@
-import { KEYWORDS, NODE_TYPES, returnTypes, SYMBOLS, TOKEN_TYPES, varTypes } from './constants';
+import {
+  binaryOperators,
+  keywordConstants,
+  KEYWORDS,
+  NODE_TYPES,
+  returnTypes,
+  SYMBOLS,
+  TOKEN_TYPES,
+  unaryOperators,
+  varTypes,
+} from './constants';
 
 const throwSynxtarError = (message = '') => {
   if (message) {
@@ -90,15 +100,131 @@ const getNextTokenAndAdvance = () => {
 
   return nextToken;
 };
-const getNextToken = () => {
-  return _tokens[_currenTokenIndex];
+const getNextToken = (count = 0) => {
+  return _tokens[_currenTokenIndex + count];
 };
 const advanceTokens = (count = 1) => {
   _currenTokenIndex += count;
 };
 
+const EXPRESSION_TYPES = {
+  SINGLE_TERM: 'SINGLE_TERM',
+  IDENTIFIER: 'IDENTIFIER',
+  UNARY_EXPERSSION: 'UNARY_EXPERSSION',
+  BINARY_EXPERSSION: 'BINARY_EXPERSSION',
+};
+
+const parseTerm = () => {
+  const termToken = getNextToken();
+
+  const isConstant =
+    [TOKEN_TYPES.INT_CONST, TOKEN_TYPES.STRING_CONST].includes(termToken.type) ||
+    (termToken.type === TOKEN_TYPES.KEYWORD && keywordConstants.includes(termToken.value));
+  if (isConstant) {
+    advanceTokens();
+
+    return {
+      type: termToken.type,
+      value: termToken.value,
+    };
+  }
+
+  if (termToken.type === TOKEN_TYPES.IDENTIFIER) {
+    const nextToken = getNextToken(1);
+    const isSubroutineCall =
+      nextToken.value === SYMBOLS.DOT || nextToken.value === SYMBOLS.ROUND_LEFT;
+
+    if (isSubroutineCall) {
+      return parseSubroutineCall();
+    }
+
+    const isArrayAccess = nextToken.value === SYMBOLS.SQUARE_LEFT;
+    if (isArrayAccess) {
+      advanceTokens(2);
+
+      const expression = parseExpression();
+      if (!expression) {
+        throwSynxtarError('[ARRAY_ACCESS] Should contain index');
+      }
+
+      testToken(
+        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SQUARE_RIGHT },
+        getNextTokenAndAdvance(),
+      );
+
+      return {
+        type: NODE_TYPES.ARRAY_ACCESS,
+        id: termToken.value,
+        index: expression,
+      };
+    }
+
+    advanceTokens();
+    return {
+      type: termToken.type,
+      id: termToken.value,
+    };
+  }
+
+  throwSynxtarError(`Couldnt parse a term`);
+};
+
 const parseExpression = () => {
-  return null;
+  const unaryOpToken = unaryOperators.includes(getNextToken().value)
+    ? getNextTokenAndAdvance()
+    : null;
+
+  const term = parseTerm();
+
+  const binaryOpToken = binaryOperators.includes(getNextToken().value)
+    ? getNextTokenAndAdvance()
+    : null;
+
+  if (binaryOpToken) {
+    const secondUnaryOpToken = unaryOperators.includes(getNextToken().value)
+      ? getNextTokenAndAdvance()
+      : null;
+    const secondTerm = parseTerm();
+
+    return {
+      type: EXPRESSION_TYPES.BINARY_EXPERSSION,
+      left: unaryOpToken
+        ? {
+            type: EXPRESSION_TYPES.UNARY_EXPERSSION,
+            term,
+          }
+        : {
+            type: EXPRESSION_TYPES.SINGLE_TERM,
+            term,
+          },
+      op: binaryOpToken.value,
+      right: secondUnaryOpToken
+        ? {
+            type: EXPRESSION_TYPES.UNARY_EXPERSSION,
+            term: secondTerm,
+          }
+        : {
+            type: EXPRESSION_TYPES.SINGLE_TERM,
+            term: secondTerm,
+          },
+    };
+  }
+
+  if (unaryOpToken) {
+    return {
+      type: EXPRESSION_TYPES.UNARY_EXPERSSION,
+      term,
+    };
+  }
+
+  if (term) {
+    return {
+      type: EXPRESSION_TYPES.SINGLE_TERM,
+      term,
+    };
+  }
+
+  throwSynxtarError('[parseExpression] Couldnt parse an expression');
 };
 
 const parseParameterList = () => {
@@ -181,13 +307,11 @@ const parseIf = () => {
     tokens,
   );
 
-  const expression = parseExpression();
+  if (getNextToken().value === SYMBOLS.ROUND_RIGHT) {
+    throwSynxtarError(`[parseIf] Missed expression`);
+  }
 
-  // FIXME:
-  advanceTokens();
-  // if (!expression) {
-  //   throwSynxtarError(`[parseIf] Missed expression`);
-  // }
+  const expression = parseExpression();
 
   testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
 
@@ -202,18 +326,15 @@ const parseIf = () => {
 
   return {
     type: NODE_TYPES.IF,
-    testExpression: expression,
+    test: expression,
     body,
     elseBody,
   };
 };
 const parseWhile = () => {};
-const parseDo = () => {
-  const tokens = getNextTokensAndAdvance(2);
-  testTokens(
-    [{ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.DO }, idinentifierExpectedToken],
-    tokens,
-  );
+const parseSubroutineCall = () => {
+  const variableToken = getNextTokenAndAdvance();
+  testToken(idinentifierExpectedToken, variableToken);
 
   const isCalledOnClass = getNextToken().value === SYMBOLS.DOT;
   if (isCalledOnClass) {
@@ -227,32 +348,48 @@ const parseDo = () => {
       classRoutineTokens,
     );
 
-    const expression = parseExpression();
+    const result = [];
+    let currentToken = getNextToken();
+    while (currentToken.value !== SYMBOLS.ROUND_RIGHT) {
+      result.push(parseExpression);
 
-    testTokens(
-      [
-        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT },
-        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI },
-      ],
-      getNextTokensAndAdvance(2),
-    );
+      if (getNextToken().value === SYMBOLS.COMMA) {
+        advanceTokens();
+      }
+
+      currentToken = getNextToken();
+    }
+
+    testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
 
     return {
-      type: NODE_TYPES.DO,
-      classId: tokens[1].value,
-      routineId: classRoutineTokens[1].value,
-      expression,
+      type: NODE_TYPES.SUBROUTINE_CALL,
+      classId: variableToken.value,
+      subroutineId: classRoutineTokens[1].value,
+      arguments: result,
     };
   }
 
   const expression = parseExpression();
 
+  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
+
+  return {
+    type: NODE_TYPES.SUBROUTINE_CALL,
+    subroutineId: variableToken.value,
+    expression,
+  };
+};
+const parseDo = () => {
+  testToken({ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.DO }, getNextTokenAndAdvance());
+
+  const subroutineCall = parseSubroutineCall();
+
   testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI }, getNextTokenAndAdvance());
 
   return {
     type: NODE_TYPES.DO,
-    routineId: tokens[1].value,
-    expression,
+    subroutineCall,
   };
 };
 const parseReturn = () => {
