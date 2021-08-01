@@ -115,6 +115,14 @@ const EXPRESSION_TYPES = {
 };
 
 const parseTerm = () => {
+  const hasPriorityExpression = getNextToken().value === SYMBOLS.ROUND_LEFT;
+  if (hasPriorityExpression) {
+    advanceTokens();
+    const expression = parseExpression();
+    testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
+    return expression;
+  }
+
   const termToken = getNextToken();
 
   const isConstant =
@@ -382,18 +390,17 @@ const parseDo = () => {
   };
 };
 const parseReturn = () => {
-  const tokens = getNextTokensAndAdvance(2);
-  testTokens(
-    [
-      { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.RETURN },
-      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI },
-    ],
-    tokens,
-  );
+  const tokens = getNextTokensAndAdvance(1);
+  testTokens([{ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.RETURN }], tokens);
+
+  const hasReturnValue = getNextToken().value !== SYMBOLS.SEMI;
+  const returnValue = hasReturnValue ? parseExpression() : null;
+
+  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI }, getNextTokenAndAdvance());
 
   return {
     type: NODE_TYPES.RETURN,
-    expression: null,
+    value: returnValue,
   };
 };
 const KEYWORD_TO_PARSE_MAP = {

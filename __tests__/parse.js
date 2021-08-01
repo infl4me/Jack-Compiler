@@ -63,8 +63,8 @@ test('tokenize expressionless', async () => {
               "type": "DO",
             },
             Object {
-              "expression": null,
               "type": "RETURN",
+              "value": null,
             },
           ],
           "parameters": Array [],
@@ -147,37 +147,69 @@ test('tokenize expressionless', async () => {
               "test": Object {
                 "left": Object {
                   "term": Object {
-                    "type": "INT_CONST",
-                    "value": "2",
+                    "left": Object {
+                      "term": Object {
+                        "type": "INT_CONST",
+                        "value": "2",
+                      },
+                      "type": "SINGLE_TERM",
+                    },
+                    "op": "*",
+                    "right": Object {
+                      "term": Object {
+                        "type": "INT_CONST",
+                        "value": "4",
+                      },
+                      "type": "SINGLE_TERM",
+                    },
+                    "type": "BINARY_EXPERSSION",
                   },
                   "type": "SINGLE_TERM",
                 },
-                "op": "*",
+                "op": "-",
                 "right": Object {
-                  "left": Object {
-                    "term": Object {
-                      "type": "INT_CONST",
-                      "value": "4",
-                    },
-                    "type": "SINGLE_TERM",
+                  "term": Object {
+                    "type": "INT_CONST",
+                    "value": "7",
                   },
-                  "op": "-",
-                  "right": Object {
-                    "term": Object {
-                      "type": "INT_CONST",
-                      "value": "7",
-                    },
-                    "type": "SINGLE_TERM",
-                  },
-                  "type": "BINARY_EXPERSSION",
+                  "type": "SINGLE_TERM",
                 },
                 "type": "BINARY_EXPERSSION",
               },
               "type": "if",
             },
             Object {
-              "expression": null,
               "type": "RETURN",
+              "value": Object {
+                "left": Object {
+                  "term": Object {
+                    "id": "f",
+                    "type": "IDENTIFIER",
+                  },
+                  "type": "SINGLE_TERM",
+                },
+                "op": "+",
+                "right": Object {
+                  "left": Object {
+                    "term": Object {
+                      "id": "a",
+                      "type": "IDENTIFIER",
+                    },
+                    "type": "SINGLE_TERM",
+                  },
+                  "op": "*",
+                  "right": Object {
+                    "op": "-",
+                    "term": Object {
+                      "type": "INT_CONST",
+                      "value": "9",
+                    },
+                    "type": "UNARY_EXPERSSION",
+                  },
+                  "type": "BINARY_EXPERSSION",
+                },
+                "type": "BINARY_EXPERSSION",
+              },
             },
           ],
           "parameters": Array [

@@ -19,7 +19,7 @@ class Main {
 
     function void more(int a, char f) {  // Added to test Jack syntax that is not used in
         var boolean b;      // the Square files.
-        if (2 * 4 - 7) {
+        if ((2 * 4) - 7) {
             let b = a;
             if (b) {
                 let b = f;
@@ -30,6 +30,6 @@ class Main {
         }
         else {              // There is no else keyword in the Square files.
         }
-        return;
+        return f + a * -9;
     }
 }

@@ -235,8 +235,32 @@ test('tokenize expressionless', async () => {
         "value": "(",
       },
       Object {
-        "type": "IDENTIFIER",
-        "value": "b",
+        "type": "SYMBOL",
+        "value": "(",
+      },
+      Object {
+        "type": "INT_CONST",
+        "value": "2",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "*",
+      },
+      Object {
+        "type": "INT_CONST",
+        "value": "4",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ")",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "-",
+      },
+      Object {
+        "type": "INT_CONST",
+        "value": "7",
       },
       Object {
         "type": "SYMBOL",
@@ -393,6 +417,30 @@ test('tokenize expressionless', async () => {
       Object {
         "type": "KEYWORD",
         "value": "return",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "f",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "+",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "a",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "*",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "-",
+      },
+      Object {
+        "type": "INT_CONST",
+        "value": "9",
       },
       Object {
         "type": "SYMBOL",
