@@ -3,7 +3,10 @@ import path from 'path';
 import { tokenize } from '../src';
 
 test('tokenize expressionless', async () => {
-  const input = await fs.readFile(path.join(__dirname, '__fixtures__', 'input', 'Main.jack'), 'utf-8');
+  const input = await fs.readFile(
+    path.join(__dirname, '__fixtures__', 'input', 'Main.jack'),
+    'utf-8',
+  );
 
   expect(tokenize(input)).toMatchInlineSnapshot(`
     Array [
@@ -178,6 +181,26 @@ test('tokenize expressionless', async () => {
       Object {
         "type": "SYMBOL",
         "value": "(",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "int",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "a",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ",",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "char",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "f",
       },
       Object {
         "type": "SYMBOL",

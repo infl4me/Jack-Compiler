@@ -98,8 +98,6 @@ const advanceTokens = (count = 1) => {
 };
 
 const parseExpression = () => {
-  advanceTokens(2);
-
   return null;
 };
 
@@ -173,7 +171,42 @@ const parseLet = () => {
     expression: tokens[3],
   };
 };
-const parseIf = () => {};
+const parseIf = () => {
+  const tokens = getNextTokensAndAdvance(2);
+  testTokens(
+    [
+      { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.IF },
+      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_LEFT },
+    ],
+    tokens,
+  );
+
+  const expression = parseExpression();
+
+  // FIXME:
+  advanceTokens();
+  // if (!expression) {
+  //   throwSynxtarError(`[parseIf] Missed expression`);
+  // }
+
+  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
+
+  const body = parseBlockStatement();
+
+  const withElse = getNextToken().value === KEYWORDS.ELSE;
+  let elseBody = null;
+  if (withElse) {
+    testToken({ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.ELSE }, getNextTokenAndAdvance());
+    elseBody = parseBlockStatement();
+  }
+
+  return {
+    type: NODE_TYPES.IF,
+    testExpression: expression,
+    body,
+    elseBody,
+  };
+};
 const parseWhile = () => {};
 const parseDo = () => {
   const tokens = getNextTokensAndAdvance(2);
@@ -184,15 +217,25 @@ const parseDo = () => {
 
   const isCalledOnClass = getNextToken().value === SYMBOLS.DOT;
   if (isCalledOnClass) {
-    const classRoutineTokens = getNextTokensAndAdvance(2);
+    const classRoutineTokens = getNextTokensAndAdvance(3);
     testTokens(
-      [{ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.DOT }, idinentifierExpectedToken],
+      [
+        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.DOT },
+        idinentifierExpectedToken,
+        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_LEFT },
+      ],
       classRoutineTokens,
     );
 
     const expression = parseExpression();
 
-    testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI }, getNextTokenAndAdvance());
+    testTokens(
+      [
+        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT },
+        { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI },
+      ],
+      getNextTokensAndAdvance(2),
+    );
 
     return {
       type: NODE_TYPES.DO,

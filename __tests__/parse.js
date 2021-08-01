@@ -66,7 +66,29 @@ test('tokenize expressionless', async () => {
           "type": "CLASS_SUBROUTINE",
         },
         Object {
-          "body": Array [],
+          "body": Array [
+            Object {
+              "id": Object {
+                "type": "IDENTIFIER",
+                "value": "b",
+              },
+              "type": "VAR",
+              "varType": Object {
+                "type": "KEYWORD",
+                "value": "boolean",
+              },
+            },
+            Object {
+              "body": Array [],
+              "elseBody": Array [],
+              "testExpression": null,
+              "type": "if",
+            },
+            Object {
+              "expression": null,
+              "type": "RETURN",
+            },
+          ],
           "parameters": Array [
             Object {
               "id": "a",
