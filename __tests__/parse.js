@@ -79,7 +79,49 @@ test('tokenize expressionless', async () => {
               },
             },
             Object {
-              "body": Array [],
+              "body": Array [
+                Object {
+                  "expression": Object {
+                    "type": "IDENTIFIER",
+                    "value": "a",
+                  },
+                  "type": "LET",
+                  "varId": Object {
+                    "type": "IDENTIFIER",
+                    "value": "b",
+                  },
+                },
+                Object {
+                  "body": Array [
+                    Object {
+                      "expression": Object {
+                        "type": "IDENTIFIER",
+                        "value": "f",
+                      },
+                      "type": "LET",
+                      "varId": Object {
+                        "type": "IDENTIFIER",
+                        "value": "b",
+                      },
+                    },
+                    Object {
+                      "classId": "game",
+                      "expression": null,
+                      "routineId": "run",
+                      "type": "DO",
+                    },
+                    Object {
+                      "body": Array [],
+                      "elseBody": Array [],
+                      "testExpression": null,
+                      "type": "if",
+                    },
+                  ],
+                  "elseBody": null,
+                  "testExpression": null,
+                  "type": "if",
+                },
+              ],
               "elseBody": Array [],
               "testExpression": null,
               "type": "if",

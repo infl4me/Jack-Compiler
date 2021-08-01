@@ -247,6 +247,134 @@ test('tokenize expressionless', async () => {
         "value": "{",
       },
       Object {
+        "type": "KEYWORD",
+        "value": "let",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "b",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "=",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "a",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ";",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "if",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "(",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "b",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ")",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "{",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "let",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "b",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "=",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "f",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ";",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "do",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "game",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ".",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "run",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "(",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ")",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ";",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "if",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "(",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "b",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": ")",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "{",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "}",
+      },
+      Object {
+        "type": "KEYWORD",
+        "value": "else",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "{",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "}",
+      },
+      Object {
+        "type": "SYMBOL",
+        "value": "}",
+      },
+      Object {
         "type": "SYMBOL",
         "value": "}",
       },

@@ -20,6 +20,13 @@ class Main {
     function void more(int a, char f) {  // Added to test Jack syntax that is not used in
         var boolean b;      // the Square files.
         if (b) {
+            let b = a;
+            if (b) {
+                let b = f;
+                do game.run();
+                if (b) {}
+                else {}
+            }
         }
         else {              // There is no else keyword in the Square files.
         }
