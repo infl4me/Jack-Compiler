@@ -101,7 +101,9 @@ export const tokenize = (input) => {
 
           reset();
         } else if (currentSymbol === LINE_END_SYMBOL) {
-          throw new Error(`[parse][case: STATES.INSIDE_STRING_CONSTANT] new line symbol is not allowed`);
+          throw new Error(
+            `[parse][case: STATES.INSIDE_STRING_CONSTANT] new line symbol is not allowed`,
+          );
         } else {
           buffer += currentSymbol;
         }
