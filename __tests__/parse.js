@@ -145,11 +145,33 @@ test('tokenize expressionless', async () => {
               ],
               "elseBody": Array [],
               "test": Object {
-                "term": Object {
-                  "id": "b",
-                  "type": "IDENTIFIER",
+                "left": Object {
+                  "term": Object {
+                    "type": "INT_CONST",
+                    "value": "2",
+                  },
+                  "type": "SINGLE_TERM",
                 },
-                "type": "SINGLE_TERM",
+                "op": "*",
+                "right": Object {
+                  "left": Object {
+                    "term": Object {
+                      "type": "INT_CONST",
+                      "value": "4",
+                    },
+                    "type": "SINGLE_TERM",
+                  },
+                  "op": "-",
+                  "right": Object {
+                    "term": Object {
+                      "type": "INT_CONST",
+                      "value": "7",
+                    },
+                    "type": "SINGLE_TERM",
+                  },
+                  "type": "BINARY_EXPERSSION",
+                },
+                "type": "BINARY_EXPERSSION",
               },
               "type": "if",
             },

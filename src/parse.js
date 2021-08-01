@@ -181,32 +181,20 @@ const parseExpression = () => {
     : null;
 
   if (binaryOpToken) {
-    const secondUnaryOpToken = unaryOperators.includes(getNextToken().value)
-      ? getNextTokenAndAdvance()
-      : null;
-    const secondTerm = parseTerm();
-
     return {
       type: EXPRESSION_TYPES.BINARY_EXPERSSION,
       left: unaryOpToken
         ? {
             type: EXPRESSION_TYPES.UNARY_EXPERSSION,
             term,
+            op: unaryOpToken.value,
           }
         : {
             type: EXPRESSION_TYPES.SINGLE_TERM,
             term,
           },
       op: binaryOpToken.value,
-      right: secondUnaryOpToken
-        ? {
-            type: EXPRESSION_TYPES.UNARY_EXPERSSION,
-            term: secondTerm,
-          }
-        : {
-            type: EXPRESSION_TYPES.SINGLE_TERM,
-            term: secondTerm,
-          },
+      right: parseExpression(),
     };
   }
 
@@ -214,6 +202,7 @@ const parseExpression = () => {
     return {
       type: EXPRESSION_TYPES.UNARY_EXPERSSION,
       term,
+      op: unaryOpToken.value,
     };
   }
 
