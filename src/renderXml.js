@@ -1,5 +1,7 @@
 import { NODE_TYPES, TOKEN_TYPES } from './constants';
 
+// renders non-fomatted (uglified) xml
+// if you want to format it just you 3rd party services
 const renderXmlTree = (tree) => {
   if (tree.children) {
     return `<${tree.name}>${tree.children.map((child) => renderXmlTree(child)).join('')}</${
