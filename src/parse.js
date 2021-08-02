@@ -263,7 +263,7 @@ const parseVar = () => {
   while (currentToken.value !== statementTerminator) {
     testToken(idinentifierExpectedToken, currentToken);
     advanceTokens();
-    ids.push(currentToken);
+    ids.push(currentToken.value);
 
     if (getNextToken().value === SYMBOLS.COMMA) {
       advanceTokens();
@@ -523,7 +523,7 @@ const parseClassVarDec = () => {
   while (currentToken.value !== statementTerminator) {
     testToken(idinentifierExpectedToken, currentToken);
     advanceTokens();
-    ids.push(currentToken);
+    ids.push(currentToken.value);
 
     if (getNextToken().value === SYMBOLS.COMMA) {
       advanceTokens();
