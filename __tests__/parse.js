@@ -41,15 +41,15 @@ test('tokenize expressionless', async () => {
               },
             },
             Object {
-              "expression": Object {
-                "type": "IDENTIFIER",
-                "value": "game",
+              "initValue": Object {
+                "term": Object {
+                  "id": "game",
+                  "type": "IDENTIFIER",
+                },
+                "type": "SINGLE_TERM",
               },
               "type": "LET",
-              "varId": Object {
-                "type": "IDENTIFIER",
-                "value": "game",
-              },
+              "varId": "game",
             },
             Object {
               "subroutineCall": Object {
@@ -74,7 +74,12 @@ test('tokenize expressionless', async () => {
               "value": null,
             },
           ],
+          "id": "main",
           "parameters": Array [],
+          "returnType": Object {
+            "type": "KEYWORD",
+            "value": "void",
+          },
           "subroutineType": "function",
           "type": "CLASS_SUBROUTINE",
         },
@@ -110,7 +115,12 @@ test('tokenize expressionless', async () => {
               "value": null,
             },
           ],
+          "id": "more",
           "parameters": Array [],
+          "returnType": Object {
+            "type": "KEYWORD",
+            "value": "void",
+          },
           "subroutineType": "function",
           "type": "CLASS_SUBROUTINE",
         },

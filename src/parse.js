@@ -284,22 +284,24 @@ const parseVar = () => {
   };
 };
 const parseLet = () => {
-  const tokens = getNextTokensAndAdvance(5);
+  const tokens = getNextTokensAndAdvance(3);
   testTokens(
     [
       { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.LET },
       idinentifierExpectedToken,
       { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.EQUAL },
-      idinentifierExpectedToken,
-      statementTerminatorExpectedToken,
     ],
     tokens,
   );
 
+  const initValue = parseExpression();
+
+  testToken(statementTerminatorExpectedToken, getNextTokenAndAdvance());
+
   return {
     type: NODE_TYPES.LET,
-    varId: tokens[1],
-    expression: tokens[3],
+    varId: tokens[1].value,
+    initValue,
   };
 };
 const parseIf = () => {
@@ -493,6 +495,11 @@ const parseSubroutine = () => {
 
   return {
     type: NODE_TYPES.CLASS_SUBROUTINE,
+    returnType: {
+      type: tokens[1].type,
+      value: tokens[1].value,
+    },
+    id: tokens[2].value,
     subroutineType: tokens[0].value,
     parameters: parseParameterList(),
     body: parseBlockStatement(),
