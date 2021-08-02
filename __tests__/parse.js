@@ -13,7 +13,12 @@ test('tokenize expressionless', async () => {
       "body": Array [
         Object {
           "classVarDecType": "static",
-          "id": "test",
+          "ids": Array [
+            Object {
+              "type": "IDENTIFIER",
+              "value": "test",
+            },
+          ],
           "type": "CLASS_VAR_DEC",
           "varType": Object {
             "type": "KEYWORD",
@@ -23,10 +28,12 @@ test('tokenize expressionless', async () => {
         Object {
           "body": Array [
             Object {
-              "id": Object {
-                "type": "IDENTIFIER",
-                "value": "game",
-              },
+              "ids": Array [
+                Object {
+                  "type": "IDENTIFIER",
+                  "value": "game",
+                },
+              ],
               "type": "VAR",
               "varType": Object {
                 "type": "IDENTIFIER",
@@ -74,10 +81,16 @@ test('tokenize expressionless', async () => {
         Object {
           "body": Array [
             Object {
-              "id": Object {
-                "type": "IDENTIFIER",
-                "value": "b",
-              },
+              "ids": Array [
+                Object {
+                  "type": "IDENTIFIER",
+                  "value": "b",
+                },
+                Object {
+                  "type": "IDENTIFIER",
+                  "value": "f",
+                },
+              ],
               "type": "VAR",
               "varType": Object {
                 "type": "KEYWORD",

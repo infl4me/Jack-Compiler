@@ -18,7 +18,7 @@ class Main {
     }
 
     function void more(int a, char f) {  // Added to test Jack syntax that is not used in
-        var boolean b;      // the Square files.
+        var boolean b, f;      // the Square files.
         if ((2 * 4) - 7) {
             let b = a;
             if (b) {

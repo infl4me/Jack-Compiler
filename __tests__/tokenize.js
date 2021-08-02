@@ -224,6 +224,14 @@ test('tokenize expressionless', async () => {
       },
       Object {
         "type": "SYMBOL",
+        "value": ",",
+      },
+      Object {
+        "type": "IDENTIFIER",
+        "value": "f",
+      },
+      Object {
+        "type": "SYMBOL",
         "value": ";",
       },
       Object {

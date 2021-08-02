@@ -255,16 +255,24 @@ const parseParameterList = () => {
 };
 
 const parseVar = () => {
-  const tokens = getNextTokensAndAdvance(4);
-  testTokens(
-    [
-      { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.VAR },
-      varTypeExpectedToken,
-      idinentifierExpectedToken,
-      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI },
-    ],
-    tokens,
-  );
+  const tokens = getNextTokensAndAdvance(2);
+  testTokens([{ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.VAR }, varTypeExpectedToken], tokens);
+
+  const ids = [];
+  let currentToken = getNextToken();
+  while (currentToken.value !== statementTerminator) {
+    testToken(idinentifierExpectedToken, currentToken);
+    advanceTokens();
+    ids.push(currentToken);
+
+    if (getNextToken().value === SYMBOLS.COMMA) {
+      advanceTokens();
+    }
+
+    currentToken = getNextToken();
+  }
+
+  advanceTokens();
 
   return {
     type: NODE_TYPES.VAR,
@@ -272,7 +280,7 @@ const parseVar = () => {
       value: tokens[1].value,
       type: tokens[1].type,
     },
-    id: tokens[2],
+    ids,
   };
 };
 const parseLet = () => {
@@ -283,7 +291,7 @@ const parseLet = () => {
       idinentifierExpectedToken,
       { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.EQUAL },
       idinentifierExpectedToken,
-      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI },
+      statementTerminatorExpectedToken,
     ],
     tokens,
   );
@@ -328,7 +336,32 @@ const parseIf = () => {
     elseBody,
   };
 };
-const parseWhile = () => {};
+const parseWhile = () => {
+  const tokens = getNextTokensAndAdvance(2);
+  testTokens(
+    [
+      { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.WHILE },
+      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_LEFT },
+    ],
+    tokens,
+  );
+
+  if (getNextToken().value === SYMBOLS.ROUND_RIGHT) {
+    throwSynxtarError(`[parseWhile] Missed expression`);
+  }
+
+  const expression = parseExpression();
+
+  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
+
+  const body = parseBlockStatement();
+
+  return {
+    type: NODE_TYPES.WHILE,
+    test: expression,
+    body,
+  };
+};
 const parseSubroutineCall = () => {
   const variableToken = getNextTokenAndAdvance();
   testToken(idinentifierExpectedToken, variableToken);
@@ -382,7 +415,7 @@ const parseDo = () => {
 
   const subroutineCall = parseSubroutineCall();
 
-  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI }, getNextTokenAndAdvance());
+  testToken(statementTerminatorExpectedToken, getNextTokenAndAdvance());
 
   return {
     type: NODE_TYPES.DO,
@@ -393,10 +426,10 @@ const parseReturn = () => {
   const tokens = getNextTokensAndAdvance(1);
   testTokens([{ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.RETURN }], tokens);
 
-  const hasReturnValue = getNextToken().value !== SYMBOLS.SEMI;
+  const hasReturnValue = getNextToken().value !== statementTerminator;
   const returnValue = hasReturnValue ? parseExpression() : null;
 
-  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SEMI }, getNextTokenAndAdvance());
+  testToken(statementTerminatorExpectedToken, getNextTokenAndAdvance());
 
   return {
     type: NODE_TYPES.RETURN,
@@ -467,16 +500,32 @@ const parseSubroutine = () => {
 };
 
 const parseClassVarDec = () => {
-  const tokens = getNextTokensAndAdvance(4);
+  const tokens = getNextTokensAndAdvance(2);
   testTokens(
     [
       { type: TOKEN_TYPES.KEYWORD, value: [KEYWORDS.STATIC, KEYWORDS.FIELD] },
       varTypeExpectedToken,
-      idinentifierExpectedToken,
-      statementTerminatorExpectedToken,
+      // idinentifierExpectedToken,
+      // statementTerminatorExpectedToken,
     ],
     tokens,
   );
+
+  const ids = [];
+  let currentToken = getNextToken();
+  while (currentToken.value !== statementTerminator) {
+    testToken(idinentifierExpectedToken, currentToken);
+    advanceTokens();
+    ids.push(currentToken);
+
+    if (getNextToken().value === SYMBOLS.COMMA) {
+      advanceTokens();
+    }
+
+    currentToken = getNextToken();
+  }
+
+  advanceTokens();
 
   return {
     type: NODE_TYPES.CLASS_VAR_DEC,
@@ -485,7 +534,7 @@ const parseClassVarDec = () => {
       value: tokens[1].value,
       type: tokens[1].type,
     },
-    id: tokens[2].value,
+    ids,
   };
 };
 
