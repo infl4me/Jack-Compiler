@@ -183,26 +183,6 @@ test('tokenize expressionless', async () => {
         "value": "(",
       },
       Object {
-        "type": "KEYWORD",
-        "value": "int",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "a",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ",",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "char",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "f",
-      },
-      Object {
         "type": "SYMBOL",
         "value": ")",
       },
@@ -224,78 +204,6 @@ test('tokenize expressionless', async () => {
       },
       Object {
         "type": "SYMBOL",
-        "value": ",",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "f",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ";",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "if",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "(",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "(",
-      },
-      Object {
-        "type": "INT_CONST",
-        "value": "2",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "*",
-      },
-      Object {
-        "type": "INT_CONST",
-        "value": "4",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ")",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "-",
-      },
-      Object {
-        "type": "INT_CONST",
-        "value": "7",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ")",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "{",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "let",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "b",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "=",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "a",
-      },
-      Object {
-        "type": "SYMBOL",
         "value": ";",
       },
       Object {
@@ -317,94 +225,6 @@ test('tokenize expressionless', async () => {
       Object {
         "type": "SYMBOL",
         "value": "{",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "let",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "b",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "=",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "f",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ";",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "do",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "game",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ".",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "run",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "(",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ")",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ";",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "if",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "(",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "b",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": ")",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "{",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "}",
-      },
-      Object {
-        "type": "KEYWORD",
-        "value": "else",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "{",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "}",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "}",
       },
       Object {
         "type": "SYMBOL",
@@ -425,30 +245,6 @@ test('tokenize expressionless', async () => {
       Object {
         "type": "KEYWORD",
         "value": "return",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "f",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "+",
-      },
-      Object {
-        "type": "IDENTIFIER",
-        "value": "a",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "*",
-      },
-      Object {
-        "type": "SYMBOL",
-        "value": "-",
-      },
-      Object {
-        "type": "INT_CONST",
-        "value": "9",
       },
       Object {
         "type": "SYMBOL",
