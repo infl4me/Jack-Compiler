@@ -22,7 +22,9 @@ export const SYMBOLS = {
   LESS_THAN: '<',
   MORE_THAN: '>',
   EQUAL: '=',
+  NEG: '~',
 };
+export const symbols = Object.values(SYMBOLS);
 
 export const TOKEN_TYPES = {
   KEYWORD: 'KEYWORD',
@@ -95,6 +97,7 @@ export const keywordConstants = Object.values(KEYWORD_CONSTANTS);
 
 export const UNARY_OPERATORS = {
   MINUS: SYMBOLS.MINUS,
+  NEG: SYMBOLS.NEG,
 };
 export const unaryOperators = Object.values(UNARY_OPERATORS);
 
@@ -110,3 +113,10 @@ export const BINARY_OPERATORS = {
   EQUAL: SYMBOLS.EQUAL,
 };
 export const binaryOperators = Object.values(BINARY_OPERATORS);
+
+export const EXPRESSION_TYPES = {
+  SINGLE_TERM: 'SINGLE_TERM',
+  IDENTIFIER: 'IDENTIFIER',
+  UNARY_EXPERSSION: 'UNARY_EXPERSSION',
+  BINARY_EXPERSSION: 'BINARY_EXPERSSION',
+};

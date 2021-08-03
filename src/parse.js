@@ -1,5 +1,6 @@
 import {
   binaryOperators,
+  EXPRESSION_TYPES,
   keywordConstants,
   KEYWORDS,
   NODE_TYPES,
@@ -43,15 +44,22 @@ const statementTerminatorExpectedToken = { type: TOKEN_TYPES.SYMBOL, value: stat
  * Checks token for matching given expectedToken. If fails throws an error
  */
 const testToken = (expectedToken, token) => {
-  if (typeof expectedToken.type === 'string' && expectedToken.type !== token.type) {
+  const throwError = (message = '') => {
     throw new Error(
-      `Invalid token type. Expected: '${expectedToken.type}', Received: '${token.type}'. Value: '${token.value}'`,
+      `${message ? `${message} ` : ''}
+      Expected: ${JSON.stringify(expectedToken, null, 2)}
+      Received: ${JSON.stringify(token, null, 2)}
+      
+      _currenTokenIndex: ${_currenTokenIndex}
+      _token: ${JSON.stringify(_tokens[_currenTokenIndex], null, 2)}`,
     );
+  };
+
+  if (typeof expectedToken.type === 'string' && expectedToken.type !== token.type) {
+    throwError('Invalid token type.');
   }
   if (expectedToken.type instanceof Array && !expectedToken.type.includes(token.type)) {
-    throw new Error(
-      `Invalid token type. Expected: '${expectedToken.type}', Received: '${token.type}'. Value: '${token.value}'`,
-    );
+    throwError('Invalid token type.');
   }
 
   if (expectedToken.value) {
@@ -62,16 +70,12 @@ const testToken = (expectedToken, token) => {
 
     if (expectedTokenValue) {
       if (typeof expectedToken.value === 'string' && expectedToken.value !== token.value) {
-        throw new Error(
-          `Invalid token value. Expected: '${expectedToken.value}', Received: '${token.value}'`,
-        );
+        throwError('Invalid token value.');
       } else if (
         expectedToken.value instanceof Array &&
         !expectedToken.value.includes(token.value)
       ) {
-        throw new Error(
-          `Invalid token value. Expected: '${expectedToken.value}', Received: '${token.value}'`,
-        );
+        throwError('Invalid token value.');
       }
     }
   }
@@ -105,13 +109,6 @@ const getNextToken = (count = 0) => {
 };
 const advanceTokens = (count = 1) => {
   _currenTokenIndex += count;
-};
-
-const EXPRESSION_TYPES = {
-  SINGLE_TERM: 'SINGLE_TERM',
-  IDENTIFIER: 'IDENTIFIER',
-  UNARY_EXPERSSION: 'UNARY_EXPERSSION',
-  BINARY_EXPERSSION: 'BINARY_EXPERSSION',
 };
 
 const parseTerm = () => {
@@ -174,7 +171,7 @@ const parseTerm = () => {
     };
   }
 
-  throwSynxtarError(`Couldnt parse a term`);
+  throwSynxtarError(`Couldnt parse a term: ${JSON.stringify(termToken, null, 2)}`);
 };
 
 const parseExpression = () => {
@@ -369,47 +366,42 @@ const parseSubroutineCall = () => {
   testToken(idinentifierExpectedToken, variableToken);
 
   const isCalledOnClass = getNextToken().value === SYMBOLS.DOT;
+
+  let tokens;
   if (isCalledOnClass) {
-    const classRoutineTokens = getNextTokensAndAdvance(3);
+    tokens = getNextTokensAndAdvance(3);
     testTokens(
       [
         { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.DOT },
         idinentifierExpectedToken,
         { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_LEFT },
       ],
-      classRoutineTokens,
+      tokens,
     );
-
-    const result = [];
-    let currentToken = getNextToken();
-    while (currentToken.value !== SYMBOLS.ROUND_RIGHT) {
-      result.push(parseExpression);
-
-      if (getNextToken().value === SYMBOLS.COMMA) {
-        advanceTokens();
-      }
-
-      currentToken = getNextToken();
-    }
-
-    testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
-
-    return {
-      type: NODE_TYPES.SUBROUTINE_CALL,
-      classId: variableToken.value,
-      subroutineId: classRoutineTokens[1].value,
-      arguments: result,
-    };
+  } else {
+    tokens = getNextTokensAndAdvance(1);
+    testTokens([{ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_LEFT }], tokens);
   }
 
-  const expression = parseExpression();
+  const result = [];
+  let currentToken = getNextToken();
+  while (currentToken.value !== SYMBOLS.ROUND_RIGHT) {
+    result.push(parseExpression());
+
+    if (getNextToken().value === SYMBOLS.COMMA) {
+      advanceTokens();
+    }
+
+    currentToken = getNextToken();
+  }
 
   testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.ROUND_RIGHT }, getNextTokenAndAdvance());
 
   return {
     type: NODE_TYPES.SUBROUTINE_CALL,
-    subroutineId: variableToken.value,
-    expression,
+    classId: variableToken.value,
+    subroutineId: isCalledOnClass ? tokens[1].value : undefined,
+    arguments: result,
   };
 };
 const parseDo = () => {
@@ -552,12 +544,24 @@ const parseClassBlockStatement = () => {
   let currentToken = getNextToken();
   while (currentToken.value !== blockStatementClose) {
     testToken(
-      { type: TOKEN_TYPES.KEYWORD, value: [KEYWORDS.STATIC, KEYWORDS.FIELD, KEYWORDS.FUNCTION] },
+      {
+        type: TOKEN_TYPES.KEYWORD,
+        value: [
+          KEYWORDS.STATIC,
+          KEYWORDS.FIELD,
+          KEYWORDS.FUNCTION,
+          KEYWORDS.CONSTRUCTOR,
+          KEYWORDS.METHOD,
+        ],
+      },
       currentToken,
     );
+
     if (currentToken.value === KEYWORDS.STATIC || currentToken.value === KEYWORDS.FIELD) {
       result.push(parseClassVarDec());
-    } else if (currentToken.value === KEYWORDS.FUNCTION) {
+    } else if (
+      [KEYWORDS.FUNCTION, KEYWORDS.METHOD, KEYWORDS.CONSTRUCTOR].includes(currentToken.value)
+    ) {
       result.push(parseSubroutine());
     } else {
       throwSynxtarError(
@@ -589,6 +593,7 @@ const parseClass = () => {
 };
 
 export const parse = (tkns = []) => {
+  _currenTokenIndex = 0;
   _tokens = tkns;
 
   return parseClass();

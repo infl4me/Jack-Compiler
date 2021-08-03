@@ -1,4 +1,4 @@
-import { NODE_TYPES, TOKEN_TYPES } from './constants';
+import { EXPRESSION_TYPES, NODE_TYPES, TOKEN_TYPES } from './constants';
 
 // renders non-fomatted (uglified) xml
 // if you want to format it just use 3rd party services
@@ -13,6 +13,26 @@ const renderXmlTree = (tree) => {
 };
 
 const renderExpression = (data) => {
+  if (data.type === EXPRESSION_TYPES.BINARY_EXPERSSION) {
+    return {
+      name: 'expression',
+      children: [
+        { name: 'term', children: [{ name: 'identifier', value: data.left.term.id }] },
+        { name: 'term', children: [{ name: 'identifier', value: data.right.term.id }] },
+      ],
+    };
+  }
+
+  if (data.type === EXPRESSION_TYPES.UNARY_EXPERSSION) {
+    return {
+      name: 'expression',
+      children: [
+        { name: 'symbol', value: data.op },
+        { name: 'term', children: [{ name: 'identifier', value: data.term.id }] },
+      ],
+    };
+  }
+
   return {
     name: 'expression',
     children: [{ name: 'term', children: [{ name: 'identifier', value: data.term.id }] }],
@@ -89,7 +109,21 @@ const renderIf = (data) => {
       { name: 'symbol', value: '}' },
       { name: 'keyword', value: 'else' },
       { name: 'symbol', value: '{' },
-      renderBlockStatement(data.elseBody),
+      data.elseBody && renderBlockStatement(data.elseBody),
+      { name: 'symbol', value: '}' },
+    ].filter(Boolean),
+  };
+};
+const renderWhile = (data) => {
+  return {
+    name: 'whileStatement',
+    children: [
+      { name: 'keyword', value: 'while' },
+      { name: 'symbol', value: '(' },
+      renderExpression(data.test),
+      { name: 'symbol', value: ')' },
+      { name: 'symbol', value: '{' },
+      renderBlockStatement(data.body),
       { name: 'symbol', value: '}' },
     ],
   };
@@ -98,20 +132,27 @@ const renderBlockStatement = (data) => {
   const map = {
     [NODE_TYPES.LET]: renderLet,
     [NODE_TYPES.IF]: renderIf,
-    // [NODE_TYPES.WHILE]: parseWhile,
+    [NODE_TYPES.WHILE]: renderWhile,
     [NODE_TYPES.DO]: renderDo,
     [NODE_TYPES.RETURN]: renderReturn,
   };
 
   return {
     name: 'statements',
-    children: data.map((node) => map[node.type](node)),
+    children: data.map((node) => {
+      const render = map[node.type];
+      if (!render) {
+        throw new Error(`[renderBlockStatement] No render for: ${node.type}`);
+      }
+
+      return render(node);
+    }),
   };
 };
 
 const renderSubroutineBlockStatement = (data) => {
   const hasVarDec = data[0]?.type === NODE_TYPES.VAR;
-  const statements = hasVarDec ? data.slice(1) : data;
+  const statements = hasVarDec ? data.filter((item) => item.type !== NODE_TYPES.VAR) : data;
   const varDecRendered = hasVarDec ? renderVar(data[0]) : null;
 
   return {

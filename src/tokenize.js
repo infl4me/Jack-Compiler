@@ -1,4 +1,4 @@
-import { KEYWORDS, SYMBOLS, TOKEN_TYPES } from './constants';
+import { KEYWORDS, symbols, TOKEN_TYPES } from './constants';
 
 const SPACE_SYMBOL = ' ';
 const LINE_END_SYMBOL = '\n';
@@ -16,9 +16,7 @@ const STATES = {
   INSIDE_MULTI_COMMENT: 'INSIDE_MULTI_COMMENT',
 };
 
-const symbols = Object.values(SYMBOLS);
 const isSymbolToken = (v) => symbols.includes(v);
-
 const isValidIdentifierCharacter = (v) => /\w/i.test(v);
 
 const keywords = Object.values(KEYWORDS);
