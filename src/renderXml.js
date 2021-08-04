@@ -1,4 +1,10 @@
-import { EXPRESSION_TYPES, NODE_TYPES, TOKEN_TYPES } from './constants';
+import { EXPRESSION_TYPES, NODE_TYPES, SYMBOLS, TOKEN_TYPES } from './constants';
+
+const invalidXmlSymbolsReplacementMap = new Map([
+  [SYMBOLS.LESS_THAN, '&lt;'],
+  [SYMBOLS.MORE_THAN, '&gt;'],
+  [SYMBOLS.AMPERSAND, '&amp;'],
+]);
 
 // renders non-fomatted (uglified) xml
 // if you want to format it just use 3rd party services
@@ -9,7 +15,11 @@ const renderXmlTree = (tree) => {
     }>`;
   }
 
-  return `<${tree.name}> ${tree.value} </${tree.name}>`;
+  const value = invalidXmlSymbolsReplacementMap.has(tree.value)
+    ? invalidXmlSymbolsReplacementMap.get(tree.value)
+    : tree.value;
+
+  return `<${tree.name}> ${value} </${tree.name}>`;
 };
 
 const renderSeparatedList = (data) => {
@@ -234,7 +244,7 @@ const renderClassVarDec = (data) => {
     children: [
       { name: 'keyword', value: data.classVarDecType },
       renderVarType(data.varType),
-      ...data.ids.map((id) => ({ name: 'identifier', value: id })),
+      ...renderSeparatedList(data.ids.map((id) => ({ name: 'identifier', value: id }))),
       { name: 'symbol', value: ';' },
     ],
   };
@@ -250,7 +260,24 @@ const renderClassSubroutine = (data) => {
       },
       { name: 'identifier', value: data.id },
       { name: 'symbol', value: '(' },
-      { name: 'parameterList', children: data.parameters.map((param) => param) },
+      {
+        name: 'parameterList',
+        children: data.parameters
+          .map((param, idx, arr) => {
+            const result = [
+              renderVarType(param.varType),
+              { name: 'identifier', value: param.id },
+              { name: 'symbol', value: ',' },
+            ];
+
+            if (arr.length - 1 === idx) {
+              result.pop();
+            }
+
+            return result;
+          })
+          .flat(),
+      },
       { name: 'symbol', value: ')' },
       renderSubroutineBlockStatement(data.body),
     ],
