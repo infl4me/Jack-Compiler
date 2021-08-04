@@ -129,7 +129,8 @@ const parseTerm = () => {
     advanceTokens();
 
     return {
-      type: termToken.type,
+      type: NODE_TYPES.CONSTANT,
+      constantType: termToken.type,
       value: termToken.value,
     };
   }
@@ -166,7 +167,7 @@ const parseTerm = () => {
 
     advanceTokens();
     return {
-      type: termToken.type,
+      type: NODE_TYPES.IDENTIFIER,
       id: termToken.value,
     };
   }
@@ -187,15 +188,18 @@ const parseExpression = () => {
 
   if (binaryOpToken) {
     return {
-      type: EXPRESSION_TYPES.BINARY_EXPERSSION,
+      type: NODE_TYPES.EXPRESSION,
+      expressionType: EXPRESSION_TYPES.BINARY_EXPERSSION,
       left: unaryOpToken
         ? {
-            type: EXPRESSION_TYPES.UNARY_EXPERSSION,
+            type: NODE_TYPES.EXPRESSION,
+            expressionType: EXPRESSION_TYPES.UNARY_EXPERSSION,
             term,
             op: unaryOpToken.value,
           }
         : {
-            type: EXPRESSION_TYPES.SINGLE_TERM,
+            type: NODE_TYPES.EXPRESSION,
+            expressionType: EXPRESSION_TYPES.SINGLE_TERM,
             term,
           },
       op: binaryOpToken.value,
@@ -205,7 +209,8 @@ const parseExpression = () => {
 
   if (unaryOpToken) {
     return {
-      type: EXPRESSION_TYPES.UNARY_EXPERSSION,
+      type: NODE_TYPES.EXPRESSION,
+      expressionType: EXPRESSION_TYPES.UNARY_EXPERSSION,
       term,
       op: unaryOpToken.value,
     };
@@ -213,7 +218,8 @@ const parseExpression = () => {
 
   if (term) {
     return {
-      type: EXPRESSION_TYPES.SINGLE_TERM,
+      type: NODE_TYPES.EXPRESSION,
+      expressionType: EXPRESSION_TYPES.SINGLE_TERM,
       term,
     };
   }
@@ -501,12 +507,7 @@ const parseSubroutine = () => {
 const parseClassVarDec = () => {
   const tokens = getNextTokensAndAdvance(2);
   testTokens(
-    [
-      { type: TOKEN_TYPES.KEYWORD, value: [KEYWORDS.STATIC, KEYWORDS.FIELD] },
-      varTypeExpectedToken,
-      // idinentifierExpectedToken,
-      // statementTerminatorExpectedToken,
-    ],
+    [{ type: TOKEN_TYPES.KEYWORD, value: [KEYWORDS.STATIC, KEYWORDS.FIELD] }, varTypeExpectedToken],
     tokens,
   );
 

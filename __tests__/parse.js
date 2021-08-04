@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { tokenize, parse } from '../src';
 
-test('tokenize expressionless', async () => {
+test('parse expressionless', async () => {
   const input = await fs.readFile(
     path.join(__dirname, '__fixtures__', 'input', 'Main.jack'),
     'utf-8',
@@ -36,11 +36,12 @@ test('tokenize expressionless', async () => {
             },
             Object {
               "initValue": Object {
+                "expressionType": "SINGLE_TERM",
                 "term": Object {
                   "id": "game",
                   "type": "IDENTIFIER",
                 },
-                "type": "SINGLE_TERM",
+                "type": "EXPRESSION",
               },
               "type": "LET",
               "varId": "game",
@@ -93,11 +94,12 @@ test('tokenize expressionless', async () => {
               "body": Array [],
               "elseBody": Array [],
               "test": Object {
+                "expressionType": "SINGLE_TERM",
                 "term": Object {
                   "id": "b",
                   "type": "IDENTIFIER",
                 },
-                "type": "SINGLE_TERM",
+                "type": "EXPRESSION",
               },
               "type": "if",
             },

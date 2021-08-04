@@ -12,31 +12,87 @@ const renderXmlTree = (tree) => {
   return `<${tree.name}> ${tree.value} </${tree.name}>`;
 };
 
-const renderExpression = (data) => {
-  if (data.type === EXPRESSION_TYPES.BINARY_EXPERSSION) {
-    return {
-      name: 'expression',
-      children: [
-        { name: 'term', children: [{ name: 'identifier', value: data.left.term.id }] },
-        { name: 'term', children: [{ name: 'identifier', value: data.right.term.id }] },
-      ],
-    };
-  }
-
-  if (data.type === EXPRESSION_TYPES.UNARY_EXPERSSION) {
-    return {
-      name: 'expression',
-      children: [
-        { name: 'symbol', value: data.op },
-        { name: 'term', children: [{ name: 'identifier', value: data.term.id }] },
-      ],
-    };
-  }
-
+const renderSubroutineCall = (term) => {
   return {
-    name: 'expression',
-    children: [{ name: 'term', children: [{ name: 'identifier', value: data.term.id }] }],
+    name: 'term',
+    children: [
+      { name: 'identifier', value: term.classId },
+      term.subroutineId && { name: 'symbol', value: '.' },
+      term.subroutineId && { name: 'identifier', value: term.subroutineId },
+      { name: 'symbol', value: '(' },
+      {
+        name: 'expressionList',
+        children: term.arguments
+          .map((arg, idx, arr) =>
+            arr.length - 1 === idx
+              ? [renderExpression(arg)]
+              : [renderExpression(arg), { name: 'symbol', value: ',' }],
+          )
+          .flat(),
+      },
+      { name: 'symbol', value: ')' },
+    ].filter(Boolean),
   };
+};
+
+const renderTerm = (term) => {
+  if (term.type === NODE_TYPES.EXPRESSION) {
+    return { name: 'term', children: [renderExpression(term)] };
+  }
+
+  switch (term.type) {
+    case NODE_TYPES.IDENTIFIER:
+      return { name: 'term', children: [{ name: 'identifier', value: term.id }] };
+    case NODE_TYPES.CONSTANT: {
+      const map = {
+        [TOKEN_TYPES.STRING_CONST]: 'stringConstant',
+        [TOKEN_TYPES.INT_CONST]: 'integerConstant',
+        [TOKEN_TYPES.KEYWORD]: 'keyword',
+      };
+      const name = map[term.constantType];
+      if (!name) {
+        throw new Error(`Unknown constant type: ${term.constantType}`);
+      }
+
+      return { name: 'term', children: [{ name, value: term.value }] };
+    }
+    case NODE_TYPES.SUBROUTINE_CALL:
+      return renderSubroutineCall(term);
+
+    default:
+      throw new Error(`Unknown term type: "${term.type}"`);
+  }
+};
+const renderExpression = (data) => {
+  switch (data.expressionType) {
+    case EXPRESSION_TYPES.BINARY_EXPERSSION:
+      return {
+        name: 'expression',
+        children: [
+          renderTerm(data.left.term),
+          { name: 'symbol', value: data.op },
+          renderTerm(data.right.term),
+        ],
+      };
+    case EXPRESSION_TYPES.UNARY_EXPERSSION:
+      return {
+        name: 'expression',
+        children: [
+          {
+            name: 'term',
+            children: [{ name: 'symbol', value: data.op }, renderTerm(data.term)],
+          },
+        ],
+      };
+    case EXPRESSION_TYPES.SINGLE_TERM:
+      return {
+        name: 'expression',
+        children: [renderTerm(data.term)],
+      };
+
+    default:
+      throw new Error(`Unknown expression type: "${data.type}"`);
+  }
 };
 
 const renderVarType = (varType) => {
@@ -73,15 +129,7 @@ const renderDo = (data) => {
     name: 'doStatement',
     children: [
       { name: 'keyword', value: 'do' },
-      { name: 'identifier', value: data.subroutineCall.classId },
-      { name: 'symbol', value: '.' },
-      { name: 'identifier', value: data.subroutineCall.subroutineId },
-      { name: 'symbol', value: '(' },
-      {
-        name: 'expressionList',
-        children: data.subroutineCall.arguments.map((arg) => renderExpression(arg)),
-      },
-      { name: 'symbol', value: ')' },
+      ...renderSubroutineCall(data.subroutineCall).children,
       { name: 'symbol', value: ';' },
     ],
   };
@@ -91,7 +139,7 @@ const renderReturn = (data) => {
     name: 'returnStatement',
     children: [
       { name: 'keyword', value: 'return' },
-      data.value ? renderExpression(data.value) : null,
+      data.value && renderExpression(data.value),
       { name: 'symbol', value: ';' },
     ].filter(Boolean),
   };
@@ -107,10 +155,10 @@ const renderIf = (data) => {
       { name: 'symbol', value: '{' },
       renderBlockStatement(data.body),
       { name: 'symbol', value: '}' },
-      { name: 'keyword', value: 'else' },
-      { name: 'symbol', value: '{' },
+      data.elseBody && { name: 'keyword', value: 'else' },
+      data.elseBody && { name: 'symbol', value: '{' },
       data.elseBody && renderBlockStatement(data.elseBody),
-      { name: 'symbol', value: '}' },
+      data.elseBody && { name: 'symbol', value: '}' },
     ].filter(Boolean),
   };
 };
@@ -151,16 +199,12 @@ const renderBlockStatement = (data) => {
 };
 
 const renderSubroutineBlockStatement = (data) => {
-  const hasVarDec = data[0]?.type === NODE_TYPES.VAR;
-  const statements = hasVarDec ? data.filter((item) => item.type !== NODE_TYPES.VAR) : data;
-  const varDecRendered = hasVarDec ? renderVar(data[0]) : null;
-
   return {
     name: 'subroutineBody',
     children: [
       { name: 'symbol', value: '{' },
-      varDecRendered,
-      renderBlockStatement(statements),
+      ...data.filter((item) => item.type === NODE_TYPES.VAR).map((item) => renderVar(item)),
+      renderBlockStatement(data.filter((item) => item.type !== NODE_TYPES.VAR)),
       { name: 'symbol', value: '}' },
     ].filter(Boolean),
   };
@@ -170,8 +214,8 @@ const renderClassVarDec = (data) => {
   return {
     name: 'classVarDec',
     children: [
-      { name: 'keyword', value: 'static' },
-      { name: 'keyword', value: data.varType.value },
+      { name: 'keyword', value: data.classVarDecType },
+      renderVarType(data.varType),
       ...data.ids.map((id) => ({ name: 'identifier', value: id })),
       { name: 'symbol', value: ';' },
     ],
@@ -182,7 +226,10 @@ const renderClassSubroutine = (data) => {
     name: 'subroutineDec',
     children: [
       { name: 'keyword', value: data.subroutineType },
-      { name: 'keyword', value: data.returnType.value },
+      {
+        name: TOKEN_TYPES.KEYWORD === data.returnType.type ? 'keyword' : 'identifier',
+        value: data.returnType.value,
+      },
       { name: 'identifier', value: data.id },
       { name: 'symbol', value: '(' },
       { name: 'parameterList', children: data.parameters.map((param) => param) },
