@@ -287,15 +287,20 @@ const parseVar = () => {
   };
 };
 const parseLet = () => {
-  const tokens = getNextTokensAndAdvance(3);
+  const tokens = getNextTokensAndAdvance(2);
   testTokens(
-    [
-      { type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.LET },
-      idinentifierExpectedToken,
-      { type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.EQUAL },
-    ],
+    [{ type: TOKEN_TYPES.KEYWORD, value: KEYWORDS.LET }, idinentifierExpectedToken],
     tokens,
   );
+  const isArrayAccess = getNextToken().value === SYMBOLS.SQUARE_LEFT;
+  let arrayIndex = null;
+  if (isArrayAccess) {
+    advanceTokens();
+    arrayIndex = parseExpression();
+    testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.SQUARE_RIGHT }, getNextTokenAndAdvance());
+  }
+
+  testToken({ type: TOKEN_TYPES.SYMBOL, value: SYMBOLS.EQUAL }, getNextTokenAndAdvance());
 
   const initValue = parseExpression();
 
@@ -305,6 +310,7 @@ const parseLet = () => {
     type: NODE_TYPES.LET,
     varId: tokens[1].value,
     initValue,
+    arrayIndex,
   };
 };
 const parseIf = () => {

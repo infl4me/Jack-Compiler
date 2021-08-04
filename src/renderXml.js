@@ -12,6 +12,14 @@ const renderXmlTree = (tree) => {
   return `<${tree.name}> ${tree.value} </${tree.name}>`;
 };
 
+const renderSeparatedList = (data) => {
+  return data.reduce(
+    (acc, item, idx, arr) =>
+      arr.length - 1 === idx ? [...acc, item] : [...acc, item, { name: 'symbol', value: ',' }],
+    [],
+  );
+};
+
 const renderSubroutineCall = (term) => {
   return {
     name: 'term',
@@ -22,13 +30,7 @@ const renderSubroutineCall = (term) => {
       { name: 'symbol', value: '(' },
       {
         name: 'expressionList',
-        children: term.arguments
-          .map((arg, idx, arr) =>
-            arr.length - 1 === idx
-              ? [renderExpression(arg)]
-              : [renderExpression(arg), { name: 'symbol', value: ',' }],
-          )
-          .flat(),
+        children: renderSeparatedList(term.arguments.map(renderExpression)),
       },
       { name: 'symbol', value: ')' },
     ].filter(Boolean),
@@ -58,6 +60,16 @@ const renderTerm = (term) => {
     }
     case NODE_TYPES.SUBROUTINE_CALL:
       return renderSubroutineCall(term);
+    case NODE_TYPES.ARRAY_ACCESS:
+      return {
+        name: 'term',
+        children: [
+          { name: 'identifier', value: term.id },
+          { name: 'symbol', value: '[' },
+          renderExpression(term.index),
+          { name: 'symbol', value: ']' },
+        ],
+      };
 
     default:
       throw new Error(`Unknown term type: "${term.type}"`);
@@ -101,13 +113,14 @@ const renderVarType = (varType) => {
     value: varType.value,
   };
 };
+
 const renderVar = (data) => {
   return {
     name: 'varDec',
     children: [
       { name: 'keyword', value: 'var' },
       renderVarType(data.varType),
-      ...data.ids.map((id) => ({ name: 'identifier', value: id })),
+      ...renderSeparatedList(data.ids.map((id) => ({ name: 'identifier', value: id }))),
       { name: 'symbol', value: ';' },
     ],
   };
@@ -118,10 +131,15 @@ const renderLet = (data) => {
     children: [
       { name: 'keyword', value: 'let' },
       { name: 'identifier', value: data.varId },
+
+      data.arrayIndex && { name: 'symbol', value: '[' },
+      data.arrayIndex && renderExpression(data.arrayIndex),
+      data.arrayIndex && { name: 'symbol', value: ']' },
+
       { name: 'symbol', value: '=' },
       renderExpression(data.initValue),
       { name: 'symbol', value: ';' },
-    ],
+    ].filter(Boolean),
   };
 };
 const renderDo = (data) => {

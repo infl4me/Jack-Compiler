@@ -35,6 +35,7 @@ test('parse expressionless', async () => {
               },
             },
             Object {
+              "arrayIndex": null,
               "initValue": Object {
                 "expressionType": "SINGLE_TERM",
                 "term": Object {
