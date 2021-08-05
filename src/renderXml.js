@@ -10,9 +10,7 @@ const invalidXmlSymbolsReplacementMap = new Map([
 // if you want to format it just use 3rd party services
 const renderXmlTree = (tree) => {
   if (tree.children) {
-    return `<${tree.name}>${tree.children.map((child) => renderXmlTree(child)).join('')}</${
-      tree.name
-    }>`;
+    return `<${tree.name}>${tree.children.map(renderXmlTree).join('')}</${tree.name}>`;
   }
 
   const value = invalidXmlSymbolsReplacementMap.has(tree.value)
@@ -118,8 +116,13 @@ const renderExpression = (data) => {
 };
 
 const renderVarType = (varType) => {
+  const map = {
+    [TOKEN_TYPES.KEYWORD]: 'keyword',
+    [TOKEN_TYPES.IDENTIFIER]: 'identifier',
+  };
+
   return {
-    name: TOKEN_TYPES.KEYWORD === varType.type ? 'keyword' : 'identifier',
+    name: map[varType.type],
     value: varType.value,
   };
 };
@@ -218,7 +221,7 @@ const renderBlockStatement = (data) => {
     children: data.map((node) => {
       const render = map[node.type];
       if (!render) {
-        throw new Error(`[renderBlockStatement] No render for: ${node.type}`);
+        throw new Error(`[renderBlockStatement] No renderer for: ${node.type}`);
       }
 
       return render(node);
@@ -231,10 +234,10 @@ const renderSubroutineBlockStatement = (data) => {
     name: 'subroutineBody',
     children: [
       { name: 'symbol', value: '{' },
-      ...data.filter((item) => item.type === NODE_TYPES.VAR).map((item) => renderVar(item)),
+      ...data.filter((item) => item.type === NODE_TYPES.VAR).map(renderVar),
       renderBlockStatement(data.filter((item) => item.type !== NODE_TYPES.VAR)),
       { name: 'symbol', value: '}' },
-    ].filter(Boolean),
+    ],
   };
 };
 
@@ -289,7 +292,7 @@ const renderClass = (data) => {
     [NODE_TYPES.CLASS_SUBROUTINE]: renderClassSubroutine,
   };
 
-  return renderXmlTree({
+  return {
     name: 'class',
     children: [
       { name: 'keyword', value: 'class' },
@@ -298,9 +301,9 @@ const renderClass = (data) => {
       ...data.body.map((node) => map[node.type](node)),
       { name: 'symbol', value: '}' },
     ],
-  });
+  };
 };
 
 export const renderXml = (tree) => {
-  return renderClass(tree);
+  return renderXmlTree(renderClass(tree));
 };
