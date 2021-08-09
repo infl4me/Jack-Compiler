@@ -75,7 +75,7 @@ const compileOperator = (op) => {
 
   switch (op) {
     case '*':
-      insertVmInstruction(vmWriter.writeCall('Math.Multiply', 2));
+      insertVmInstruction(vmWriter.writeCall('Math.multiply', 2));
       break;
 
     default:
@@ -115,11 +115,17 @@ const compileWhile = () => {};
 
 const compileDo = (data) => {
   compileSubroutineCall(data.subroutineCall);
+  insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.TEMP, 0));
 };
 
-const compileReturn = () => {};
+const compileReturn = (data) => {
+  if (data.value) compileExpression(data.value);
+  else insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
 
-const compileSubroutine = (data) => {
+  insertVmInstruction(vmWriter.writeReturn());
+};
+
+const compileSubroutine = (classId, data) => {
   const localVars = data.body.filter((item) => item.type === NODE_TYPES.VAR);
 
   initVarTable(VAR_TABLE_TYPES.SUBROUTINE, [
@@ -133,7 +139,7 @@ const compileSubroutine = (data) => {
     },
   ]);
 
-  insertVmInstruction(vmWriter.writeFunction(data.id, localVars.length));
+  insertVmInstruction(vmWriter.writeFunction(`${classId}.${data.id}`, localVars.length));
 
   const map = {
     [NODE_TYPES.LET]: compileLet,
@@ -174,7 +180,7 @@ const compileClass = (data) => {
   data.body
     .filter((node) => node.type === NODE_TYPES.CLASS_SUBROUTINE)
     .forEach((subroutine) => {
-      compileSubroutine(subroutine);
+      compileSubroutine(data.id, subroutine);
     });
 };
 

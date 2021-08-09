@@ -10,12 +10,15 @@ test('compile Seven', async () => {
   );
 
   expect(compile(parse(tokenize(input)))).toMatchInlineSnapshot(`
-    "function main 0
+    "function Main.main 0
     push constant 1
     push constant 2
     push constant 3
-    call Math.Multiply 2
+    call Math.multiply 2
     add
-    call Output.printInt 1"
+    call Output.printInt 1
+    pop temp 0
+    push constant 0
+    return"
   `);
 });

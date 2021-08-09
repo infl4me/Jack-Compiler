@@ -14,6 +14,7 @@ export const SEGMENTS = {
   LOCAL: 'local',
   ARGUMENT: 'argument',
   CONSTANT: 'constant',
+  TEMP: 'temp',
 };
 
 export const writeFunction = (name, localVarCount) => {
@@ -34,4 +35,8 @@ export const writePop = (segment, index) => {
 
 export const writeArithmetic = (command) => {
   return command;
+};
+
+export const writeReturn = () => {
+  return 'return';
 };
