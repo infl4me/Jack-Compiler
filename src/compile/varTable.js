@@ -22,7 +22,7 @@ export const initVarTable = (tableType, data) => {
     let index = 0;
 
     item.vars.forEach((varData) => {
-      varData.ids.forEach((id) => {
+      const registerId = (id) => {
         if (acc[id]) {
           throw new Error(`Variable already declared: ${id}`);
         }
@@ -33,9 +33,17 @@ export const initVarTable = (tableType, data) => {
           kind: item.kind,
           index,
         };
-      });
 
-      index += 1;
+        index += 1;
+      };
+
+      if (varData.id) {
+        registerId(varData.id);
+      } else if (varData.ids) {
+        varData.ids.forEach(registerId);
+      } else {
+        throw new Error('No id provided');
+      }
     });
 
     return acc;

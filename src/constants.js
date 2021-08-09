@@ -22,7 +22,7 @@ export const SYMBOLS = {
   LESS_THAN: '<',
   MORE_THAN: '>',
   EQUAL: '=',
-  NEG: '~',
+  NOT: '~',
 };
 export const symbols = Object.values(SYMBOLS);
 
@@ -100,7 +100,7 @@ export const keywordConstants = Object.values(KEYWORD_CONSTANTS);
 
 export const UNARY_OPERATORS = {
   MINUS: SYMBOLS.MINUS,
-  NEG: SYMBOLS.NEG,
+  NEG: SYMBOLS.NOT,
 };
 export const unaryOperators = Object.values(UNARY_OPERATORS);
 

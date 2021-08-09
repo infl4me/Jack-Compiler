@@ -40,3 +40,15 @@ export const writeArithmetic = (command) => {
 export const writeReturn = () => {
   return 'return';
 };
+
+export const writeIf = (label) => {
+  return `if-goto ${label}`;
+};
+
+export const writeLabel = (label) => {
+  return `label ${label}`;
+};
+
+export const writeGoto = (label) => {
+  return `goto ${label}`;
+};
