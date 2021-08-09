@@ -9,6 +9,9 @@ import {
 } from './varTable';
 import * as vmWriter from './vmWriter';
 
+// eslint-disable-next-line no-console
+const logError = (...args) => console.error(...args);
+
 const VAR_KIND_TO_SEGMENT_MAP = {
   [VAR_KINDS.LOCAL]: vmWriter.SEGMENTS.LOCAL,
   [VAR_KINDS.ARGUMENT]: vmWriter.SEGMENTS.ARGUMENT,
@@ -17,7 +20,7 @@ const VAR_KIND_TO_SEGMENT_MAP = {
 const mapVarKindToSegment = (varKind) => {
   const segment = VAR_KIND_TO_SEGMENT_MAP[varKind];
   if (!segment) {
-    console.error(`[mapVarKindToSegment] Unknown var kind: "${varKind}"`);
+    logError(`[mapVarKindToSegment] Unknown var kind: "${varKind}"`);
   }
 
   return segment;
@@ -34,6 +37,7 @@ const throwComingSoon = () => {
   throw new Error('???');
 };
 
+let _className;
 let _vmCode = [];
 const insertVmInstruction = (instruction) => {
   _vmCode.push(instruction);
@@ -58,15 +62,22 @@ const compileSubroutineCall = (data) => {
     );
   }
 
-  data.arguments.forEach(compileExpression);
-
-  if (!data.classId) {
-    throwComingSoon();
+  const isMethodCall = !data.subroutineId;
+  // pass this as an argument
+  if (isMethodCall) {
+    insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.POINTER, 0));
   }
 
-  const name = `${data.classId}.${data.subroutineId}`;
+  data.arguments.forEach(compileExpression);
+
+  const name = isMethodCall
+    ? `${_className}.${data.classId}`
+    : `${objectVariable ? objectVariable.type : data.classId}.${data.subroutineId}`;
   insertVmInstruction(
-    vmWriter.writeCall(name, objectVariable ? data.arguments.length + 1 : data.arguments.length),
+    vmWriter.writeCall(
+      name,
+      objectVariable || isMethodCall ? data.arguments.length + 1 : data.arguments.length,
+    ),
   );
 };
 const compileTerm = (term) => {
@@ -240,7 +251,7 @@ const compileBlockStatement = (data) => {
   });
 };
 
-const compileSubroutine = (classId, data) => {
+const compileSubroutine = (data) => {
   const localVars = data.body.filter((item) => item.type === NODE_TYPES.VAR);
 
   initVarTable(VAR_TABLE_TYPES.SUBROUTINE, [
@@ -257,7 +268,7 @@ const compileSubroutine = (classId, data) => {
   const localVarCount = localVars.reduce((acc, localVar) => {
     return acc + localVar.ids.length;
   }, 0);
-  insertVmInstruction(vmWriter.writeFunction(`${classId}.${data.id}`, localVarCount));
+  insertVmInstruction(vmWriter.writeFunction(`${_className}.${data.id}`, localVarCount));
 
   if (data.subroutineType === KEYWORDS.CONSTRUCTOR) {
     const fieldVars = getFieldKindVariables();
@@ -275,6 +286,8 @@ const compileSubroutine = (classId, data) => {
 };
 
 const compileClass = (data) => {
+  _className = data.id;
+
   initVarTable(VAR_TABLE_TYPES.CLASS, [
     {
       kind: VAR_KINDS.STATIC,
@@ -294,7 +307,7 @@ const compileClass = (data) => {
   data.body
     .filter((node) => node.type === NODE_TYPES.CLASS_SUBROUTINE)
     .forEach((subroutine) => {
-      compileSubroutine(data.id, subroutine);
+      compileSubroutine(subroutine);
     });
 };
 
