@@ -1,5 +1,6 @@
 import { EXPRESSION_TYPES, KEYWORDS, NODE_TYPES, SYMBOLS, TOKEN_TYPES } from '../constants';
 import {
+  getFieldKindVariables,
   initVarTable,
   lookupVariable,
   resetVarTables,
@@ -7,6 +8,20 @@ import {
   VAR_TABLE_TYPES,
 } from './varTable';
 import * as vmWriter from './vmWriter';
+
+const VAR_KIND_TO_SEGMENT_MAP = {
+  [VAR_KINDS.LOCAL]: vmWriter.SEGMENTS.LOCAL,
+  [VAR_KINDS.ARGUMENT]: vmWriter.SEGMENTS.ARGUMENT,
+  [VAR_KINDS.FIELD]: vmWriter.SEGMENTS.THIS,
+};
+const mapVarKindToSegment = (varKind) => {
+  const segment = VAR_KIND_TO_SEGMENT_MAP[varKind];
+  if (!segment) {
+    console.error(`[mapVarKindToSegment] Unknown var kind: "${varKind}"`);
+  }
+
+  return segment;
+};
 
 let labelCounter = 0;
 const generateUniqLabel = (name) => {
@@ -24,16 +39,25 @@ const insertVmInstruction = (instruction) => {
   _vmCode.push(instruction);
 };
 
-const compileWriteVariable = (id) => {
-  const { kind, index } = lookupVariable(id);
-  insertVmInstruction(vmWriter.writePop(kind, index));
-};
-const compileReadVariable = (id) => {
-  const { kind, index } = lookupVariable(id);
-  insertVmInstruction(vmWriter.writePush(kind, index));
+const compilePushVariable = (id) => {
+  const variable = lookupVariable(id);
+  if (!variable) {
+    throw new Error(`Undefined variable: "${id}"`);
+  }
+
+  insertVmInstruction(vmWriter.writePush(mapVarKindToSegment(variable.kind), variable.index));
 };
 
 const compileSubroutineCall = (data) => {
+  const objectVariable = lookupVariable(data.classId);
+  // if variable is found then it's an object
+  // and we need to pass it as first argument
+  if (objectVariable) {
+    insertVmInstruction(
+      vmWriter.writePush(mapVarKindToSegment(objectVariable.kind), objectVariable.index),
+    );
+  }
+
   data.arguments.forEach(compileExpression);
 
   if (!data.classId) {
@@ -41,7 +65,9 @@ const compileSubroutineCall = (data) => {
   }
 
   const name = `${data.classId}.${data.subroutineId}`;
-  insertVmInstruction(vmWriter.writeCall(name, data.arguments.length));
+  insertVmInstruction(
+    vmWriter.writeCall(name, objectVariable ? data.arguments.length + 1 : data.arguments.length),
+  );
 };
 const compileTerm = (term) => {
   if (term.type === NODE_TYPES.EXPRESSION) {
@@ -51,7 +77,7 @@ const compileTerm = (term) => {
 
   switch (term.type) {
     case NODE_TYPES.IDENTIFIER: {
-      compileReadVariable(term.id);
+      compilePushVariable(term.id);
       break;
     }
     case NODE_TYPES.CONSTANT: {
@@ -65,6 +91,9 @@ const compileTerm = (term) => {
             break;
           case KEYWORDS.FALSE || KEYWORDS.NULL:
             insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
+            break;
+          case KEYWORDS.THIS:
+            insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.POINTER, 0));
             break;
 
           default:
@@ -144,7 +173,12 @@ const compileExpression = (data) => {
 const compileLet = (data) => {
   compileExpression(data.initValue);
 
-  compileWriteVariable(data.varId);
+  const variable = lookupVariable(data.varId);
+  if (!variable) {
+    throw new Error(`Undefined variable: "${data.varId}"`);
+  }
+
+  insertVmInstruction(vmWriter.writePop(mapVarKindToSegment(variable.kind), variable.index));
 };
 
 const compileIf = (data) => {
@@ -224,6 +258,18 @@ const compileSubroutine = (classId, data) => {
     return acc + localVar.ids.length;
   }, 0);
   insertVmInstruction(vmWriter.writeFunction(`${classId}.${data.id}`, localVarCount));
+
+  if (data.subroutineType === KEYWORDS.CONSTRUCTOR) {
+    const fieldVars = getFieldKindVariables();
+    insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, fieldVars.length));
+    insertVmInstruction(vmWriter.writeCall('Memory.alloc', 1));
+    insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 0));
+  }
+
+  if (data.subroutineType === KEYWORDS.METHOD) {
+    insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.ARGUMENT, 0));
+    insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 0));
+  }
 
   compileBlockStatement(data.body.filter((item) => item.type !== NODE_TYPES.VAR));
 };

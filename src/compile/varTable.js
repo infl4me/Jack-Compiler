@@ -65,6 +65,8 @@ export const lookupVariable = (name) => {
   if (_classVarTable[name]) {
     return _classVarTable[name];
   }
+};
 
-  throw new Error(`Undefined variable: ${name}`);
+export const getFieldKindVariables = () => {
+  return Object.values(_classVarTable).filter(({ kind }) => kind === VAR_KINDS.FIELD);
 };
