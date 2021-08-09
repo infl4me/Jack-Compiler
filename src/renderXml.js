@@ -28,17 +28,17 @@ const renderSeparatedList = (data) => {
   );
 };
 
-const renderSubroutineCall = (term) => {
+const renderSubroutineCall = (data) => {
   return {
     name: 'term',
     children: [
-      { name: 'identifier', value: term.classId },
-      term.subroutineId && { name: 'symbol', value: '.' },
-      term.subroutineId && { name: 'identifier', value: term.subroutineId },
+      { name: 'identifier', value: data.classId },
+      data.subroutineId && { name: 'symbol', value: '.' },
+      data.subroutineId && { name: 'identifier', value: data.subroutineId },
       { name: 'symbol', value: '(' },
       {
         name: 'expressionList',
-        children: renderSeparatedList(term.arguments.map(renderExpression)),
+        children: renderSeparatedList(data.arguments.map(renderExpression)),
       },
       { name: 'symbol', value: ')' },
     ].filter(Boolean),

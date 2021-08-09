@@ -1,11 +1,13 @@
 import { KEYWORDS, symbols, TOKEN_TYPES } from './constants';
 
 const SPACE_SYMBOL = ' ';
-const LINE_END_SYMBOL = '\n';
+const NEWLINE_SYMBOL = '\n';
 const STRING_CONSTANT_TRIGGER = '"';
 const COMMENT_TRIGGER = '//';
 const MULTI_COMMENT_OPEN_TRIGGER = '/**';
 const MULTI_COMMENT_CLOSE_TRIGGER = '*/';
+
+const whitespaceSymbols = [SPACE_SYMBOL, NEWLINE_SYMBOL, '\t', '\r'];
 
 const STATES = {
   OUTSIDE: 'OUTSIDE',
@@ -51,7 +53,7 @@ export const tokenize = (input) => {
 
     switch (state) {
       case STATES.OUTSIDE: {
-        if (currentSymbol === SPACE_SYMBOL || currentSymbol === LINE_END_SYMBOL) {
+        if (whitespaceSymbols.includes(currentSymbol)) {
           buffer = '';
         } else if (input.slice(i, i + 2) === COMMENT_TRIGGER) {
           state = STATES.INSIDE_COMMENT;
@@ -73,12 +75,12 @@ export const tokenize = (input) => {
           buffer = currentSymbol;
           state = STATES.INSIDE_IDENTIFIER;
         } else {
-          throw new Error(`[parse][case: STATES.OUTSIDE] couldn't handle: '${currentSymbol}'`);
+          throw new Error(`[parse][case: STATES.OUTSIDE] couldn't handle: "${currentSymbol}"`);
         }
         break;
       }
       case STATES.INSIDE_COMMENT: {
-        if (currentSymbol === LINE_END_SYMBOL) {
+        if (currentSymbol === NEWLINE_SYMBOL) {
           state = STATES.OUTSIDE;
         }
         break;
@@ -98,7 +100,7 @@ export const tokenize = (input) => {
           });
 
           reset();
-        } else if (currentSymbol === LINE_END_SYMBOL) {
+        } else if (currentSymbol === NEWLINE_SYMBOL) {
           throw new Error(
             `[parse][case: STATES.INSIDE_STRING_CONSTANT] new line symbol is not allowed`,
           );
