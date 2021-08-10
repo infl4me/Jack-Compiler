@@ -18,6 +18,7 @@ export const SEGMENTS = {
   POINTER: 'pointer',
   THIS: 'this',
   THAT: 'that',
+  STATIC: 'static',
 };
 
 export const writeFunction = (name, localVarCount) => {

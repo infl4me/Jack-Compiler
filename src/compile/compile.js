@@ -16,6 +16,7 @@ const VAR_KIND_TO_SEGMENT_MAP = {
   [VAR_KINDS.LOCAL]: vmWriter.SEGMENTS.LOCAL,
   [VAR_KINDS.ARGUMENT]: vmWriter.SEGMENTS.ARGUMENT,
   [VAR_KINDS.FIELD]: vmWriter.SEGMENTS.THIS,
+  [VAR_KINDS.STATIC]: vmWriter.SEGMENTS.STATIC,
 };
 const mapVarKindToSegment = (varKind) => {
   const segment = VAR_KIND_TO_SEGMENT_MAP[varKind];
@@ -293,10 +294,24 @@ const compileBlockStatement = (data) => {
 const compileSubroutine = (data) => {
   const localVars = data.body.filter((item) => item.type === NODE_TYPES.VAR);
 
+  const argumentVars =
+    data.subroutineType === KEYWORDS.METHOD
+      ? [
+          {
+            varType: {
+              value: _className,
+              type: TOKEN_TYPES.KEYWORD,
+            },
+            id: KEYWORDS.THIS,
+          },
+          ...data.parameters,
+        ]
+      : data.parameters;
+
   initVarTable(VAR_TABLE_TYPES.SUBROUTINE, [
     {
       kind: VAR_KINDS.ARGUMENT,
-      vars: data.parameters,
+      vars: argumentVars,
     },
     {
       kind: VAR_KINDS.LOCAL,
