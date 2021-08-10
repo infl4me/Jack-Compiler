@@ -34,7 +34,7 @@ test('compile ConvertToBin', async () => {
     push constant 8001
     push constant 16
     push constant 1
-    not
+    neg
     call Main.fillMemory 3
     pop temp 0
     push constant 8000
@@ -1870,7 +1870,7 @@ test('compile Pong->Ball', async () => {
     lt
     push argument 1
     push constant 1
-    not
+    neg
     eq
     and
     or
@@ -1893,7 +1893,7 @@ test('compile Pong->Ball', async () => {
     pop local 0
     push local 3
     push constant 50
-    not
+    neg
     call Math.multiply 2
     push local 2
     call Math.divide 2
@@ -1936,7 +1936,7 @@ test('compile Pong->Ball', async () => {
     pop local 1
     push local 2
     push constant 25
-    not
+    neg
     call Math.multiply 2
     push local 3
     call Math.divide 2
@@ -2494,7 +2494,7 @@ test('compile Pong->PongGame', async () => {
     not
     if-goto ELSE_117
     push constant 1
-    not
+    neg
     pop local 0
     goto EXIT_IF_118
     label ELSE_117

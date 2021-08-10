@@ -175,7 +175,7 @@ const compileOperator = (op, expressionType) => {
       break;
     case '-': {
       if (expressionType === EXPRESSION_TYPES.UNARY_EXPERSSION) {
-        insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.not));
+        insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.neg));
       } else if (expressionType === EXPRESSION_TYPES.BINARY_EXPERSSION) {
         insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.sub));
       } else {
