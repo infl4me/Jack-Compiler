@@ -52,7 +52,7 @@ const compilePushVariable = (id) => {
 const compileSubroutineCall = (data) => {
   const objectVariable = lookupVariable(data.classId);
   // if variable is found then it's an object
-  // and we need to pass it as first argument
+  // and we need to pass it as first argument to a method
   if (objectVariable) {
     insertVmInstruction(
       vmWriter.writePush(mapVarKindToSegment(objectVariable.kind), objectVariable.index),
@@ -137,8 +137,7 @@ const compileTerm = (term) => {
       compileSubroutineCall(term);
       break;
     case NODE_TYPES.ARRAY_ACCESS: {
-      const variable = lookupVariable(term.id);
-      insertVmInstruction(vmWriter.writePush(mapVarKindToSegment(variable.kind), variable.index));
+      compilePushVariable(term.id);
       compileExpression(term.index);
       insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.add));
       insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 1));
@@ -174,12 +173,16 @@ const compileOperator = (op, expressionType) => {
       insertVmInstruction(vmWriter.writeCall('Math.divide', 2));
       break;
     case '-': {
-      if (expressionType === EXPRESSION_TYPES.UNARY_EXPERSSION) {
-        insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.neg));
-      } else if (expressionType === EXPRESSION_TYPES.BINARY_EXPERSSION) {
-        insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.sub));
-      } else {
-        throw new Error(`Invalid expression`);
+      switch (expressionType) {
+        case EXPRESSION_TYPES.UNARY_EXPERSSION:
+          insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.neg));
+          break;
+        case EXPRESSION_TYPES.BINARY_EXPERSSION:
+          insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.sub));
+          break;
+
+        default:
+          throw new Error(`Invalid expression`);
       }
       break;
     }
@@ -209,9 +212,9 @@ const compileExpression = (data) => {
 };
 
 const compileLet = (data) => {
+  // if array access then handle it differently
   if (data.arrayIndex) {
-    const variable = lookupVariable(data.varId);
-    insertVmInstruction(vmWriter.writePush(mapVarKindToSegment(variable.kind), variable.index));
+    compilePushVariable(data.varId);
     compileExpression(data.arrayIndex);
     insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.add));
     compileExpression(data.initValue);
@@ -263,11 +266,15 @@ const compileWhile = (data) => {
 
 const compileDo = (data) => {
   compileSubroutineCall(data.subroutineCall);
+
+  // discard return value of void function
   insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.TEMP, 0));
 };
 
 const compileReturn = (data) => {
   if (data.value) compileExpression(data.value);
+  // subroutine should always return something
+  // if no value specified then return 0 implicitly
   else insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
 
   insertVmInstruction(vmWriter.writeReturn());
@@ -294,6 +301,7 @@ const compileBlockStatement = (data) => {
 const compileSubroutine = (data) => {
   const localVars = data.body.filter((item) => item.type === NODE_TYPES.VAR);
 
+  // implicitly set this as first argument of a method
   const argumentVars =
     data.subroutineType === KEYWORDS.METHOD
       ? [
@@ -324,6 +332,7 @@ const compileSubroutine = (data) => {
   }, 0);
   insertVmInstruction(vmWriter.writeFunction(`${_className}.${data.id}`, localVarCount));
 
+  // allocate object in heap inside a constructor
   if (data.subroutineType === KEYWORDS.CONSTRUCTOR) {
     const fieldVars = getFieldKindVariables();
     insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, fieldVars.length));
@@ -331,6 +340,7 @@ const compileSubroutine = (data) => {
     insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 0));
   }
 
+  // achor this inside a method
   if (data.subroutineType === KEYWORDS.METHOD) {
     insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.ARGUMENT, 0));
     insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 0));
@@ -358,11 +368,7 @@ const compileClass = (data) => {
     },
   ]);
 
-  data.body
-    .filter((node) => node.type === NODE_TYPES.CLASS_SUBROUTINE)
-    .forEach((subroutine) => {
-      compileSubroutine(subroutine);
-    });
+  data.body.filter((node) => node.type === NODE_TYPES.CLASS_SUBROUTINE).forEach(compileSubroutine);
 };
 
 export const compile = (tree) => {
