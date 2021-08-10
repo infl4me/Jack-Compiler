@@ -33,10 +33,6 @@ const generateUniqLabel = (name) => {
   return `${name}_${labelCounter}`;
 };
 
-const throwComingSoon = () => {
-  throw new Error('???');
-};
-
 let _className;
 let _vmCode = [];
 const insertVmInstruction = (instruction) => {
@@ -80,6 +76,19 @@ const compileSubroutineCall = (data) => {
     ),
   );
 };
+const compileStringConst = (string) => {
+  insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, string.length));
+  insertVmInstruction(vmWriter.writeCall('String.new', 1));
+
+  for (let i = 0; i < string.length; i += 1) {
+    const currentSymbol = string[i];
+
+    insertVmInstruction(
+      vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, currentSymbol.charCodeAt(0)),
+    );
+    insertVmInstruction(vmWriter.writeCall('String.appendChar', 2));
+  }
+};
 const compileTerm = (term) => {
   if (term.type === NODE_TYPES.EXPRESSION) {
     compileExpression(term);
@@ -92,35 +101,48 @@ const compileTerm = (term) => {
       break;
     }
     case NODE_TYPES.CONSTANT: {
-      if (term.constantType === TOKEN_TYPES.INT_CONST) {
-        insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, term.value));
-      } else if (term.constantType === TOKEN_TYPES.KEYWORD) {
-        switch (term.value) {
-          case KEYWORDS.TRUE:
-            insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
-            insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.not));
-            break;
-          case KEYWORDS.FALSE || KEYWORDS.NULL:
-            insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
-            break;
-          case KEYWORDS.THIS:
-            insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.POINTER, 0));
-            break;
+      switch (term.constantType) {
+        case TOKEN_TYPES.INT_CONST:
+          insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, term.value));
+          break;
+        case TOKEN_TYPES.STRING_CONST:
+          compileStringConst(term.value);
+          break;
+        case TOKEN_TYPES.KEYWORD:
+          switch (term.value) {
+            case KEYWORDS.TRUE:
+              insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
+              insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.not));
+              break;
+            case KEYWORDS.FALSE || KEYWORDS.NULL:
+              insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
+              break;
+            case KEYWORDS.THIS:
+              insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.POINTER, 0));
+              break;
 
-          default:
-            throw new Error(`Don't know how to handle: ${term.value}`);
-        }
-      } else {
-        throwComingSoon();
+            default:
+              throw new Error(`Don't know how to handle: ${term.value}`);
+          }
+          break;
+
+        default:
+          throw new Error(`Unknown constantType: "${term.constantType}"`);
       }
       break;
     }
     case NODE_TYPES.SUBROUTINE_CALL:
       compileSubroutineCall(term);
       break;
-    case NODE_TYPES.ARRAY_ACCESS:
-      throwComingSoon();
+    case NODE_TYPES.ARRAY_ACCESS: {
+      const variable = lookupVariable(term.id);
+      insertVmInstruction(vmWriter.writePush(mapVarKindToSegment(variable.kind), variable.index));
+      compileExpression(term.index);
+      insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.add));
+      insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 1));
+      insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.THAT, 0));
       break;
+    }
 
     default:
       throw new Error(`Unknown term type: "${term.type}"`);
@@ -145,6 +167,9 @@ const compileOperator = (op, expressionType) => {
   switch (op) {
     case '*':
       insertVmInstruction(vmWriter.writeCall('Math.multiply', 2));
+      break;
+    case '/':
+      insertVmInstruction(vmWriter.writeCall('Math.divide', 2));
       break;
     case '-': {
       if (expressionType === EXPRESSION_TYPES.UNARY_EXPERSSION) {
@@ -182,6 +207,19 @@ const compileExpression = (data) => {
 };
 
 const compileLet = (data) => {
+  if (data.arrayIndex) {
+    const variable = lookupVariable(data.varId);
+    insertVmInstruction(vmWriter.writePush(mapVarKindToSegment(variable.kind), variable.index));
+    compileExpression(data.arrayIndex);
+    insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.add));
+    compileExpression(data.initValue);
+    insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.TEMP, 0));
+    insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.POINTER, 1));
+    insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.TEMP, 0));
+    insertVmInstruction(vmWriter.writePop(vmWriter.SEGMENTS.THAT, 0));
+    return;
+  }
+
   compileExpression(data.initValue);
 
   const variable = lookupVariable(data.varId);
