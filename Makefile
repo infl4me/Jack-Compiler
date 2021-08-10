@@ -18,6 +18,6 @@ lint:
 	npx eslint .
 
 compile:
-	node --es-module-specifier-resolution=node ./src/fileManager.js PATH="./__tests__/__fixtures__/RealPrograms/Average"
+	node --es-module-specifier-resolution=node ./src/fileManager.js PATH="./__tests__/__fixtures__/RealPrograms/ComplexArrays"
 
 .PHONY: test

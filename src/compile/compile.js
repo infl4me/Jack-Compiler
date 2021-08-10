@@ -114,7 +114,8 @@ const compileTerm = (term) => {
               insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
               insertVmInstruction(vmWriter.writeArithmetic(vmWriter.ARITHMETIC_COMMANDS.not));
               break;
-            case KEYWORDS.FALSE || KEYWORDS.NULL:
+            case KEYWORDS.FALSE:
+            case KEYWORDS.NULL:
               insertVmInstruction(vmWriter.writePush(vmWriter.SEGMENTS.CONSTANT, 0));
               break;
             case KEYWORDS.THIS:
@@ -122,7 +123,7 @@ const compileTerm = (term) => {
               break;
 
             default:
-              throw new Error(`Don't know how to handle: ${term.value}`);
+              throw new Error(`Unexpected keyword: ${term.value}`);
           }
           break;
 
